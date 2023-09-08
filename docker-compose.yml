@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.6
+    container_name: traefik
+    command:
+      - "--api.insecure=true" # Enable insecure API for the dashboard
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.exposedByDefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.docker.network=traefik-net" # Use a custom network
+      - "--log.filePath=/var/log/access.log"
+      - "--log.format=json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log/traefik:/var/log
+    networks:
+      - traefik-net
+
+  whoami:
+    image: sreeharshav/rollingupdate:v3
+    container_name: whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`yellow.veeru4soft.xyz`)"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+    # Add your app's configuration here
+    networks:
+      - traefik-net
+
+  orange:
+    image: sreeharshav/rollingupdate:v1
+    container_name: orange
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.orange.rule=Host(`orange.veeru4soft.xyz`)"
+      - "traefik.http.services.orange.loadbalancer.server.port=80"
+    # Add your app's configuration here
+    networks:
+      - traefik-net
+
+networks:
+  traefik-net:
