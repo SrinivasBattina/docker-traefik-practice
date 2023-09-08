@@ -1,0 +1,27 @@
+docker run --dit \ 
+--name traefik \
+-p 80:80 -p 8080:8080 -p 443:443 \
+traefik:v2.6 \
+--network traefik-net \
+-v /var/run/docker.sock:/var/run/docker.sock -v /var/log/traefik:/var/log \
+
+
+
+----> v3
+
+docker run --dit \
+--name yellow \
+--network traefik-net \
+--label ""
+
+
+
+traefik ---->
+harshav3 ----> 45
+harshav2 ----> 
+
+
+- "traefik.http.routers.your-app.rule=Host(`yourdomain.com`)"  # Replace with your domain
+- "traefik.http.routers.your-app.entrypoints=web"
+- "traefik.http.services.your-app.loadbalancer.server.port=80"
+- "traefik.http.middlewares.your-app-prefix.stripprefix.prefixes=/app"
