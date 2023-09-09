@@ -1,0 +1,26 @@
+# creating traefik container with traefik-net network 
+# Port 80 is for http, if we need traefik dashboard use port 8080
+# As we know we want ssl (https) use port 443
+
+docker service create \
+    --name traefik16 \
+    --constraint=node.role==manager \
+    --publish 80:80 \
+    --publish 8080:8080 \
+    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+    --network traefik-net \
+    traefik:v1.6 \
+    --docker \
+    --docker.swarmmode \
+    --docker.domain=traefik \
+    --docker.watch \
+    --web
+
+# configuring docker image with traefik to transfer route
+docker service create \
+    --name orange \
+    --label traefik.port=80 \
+    --network traefik-net \
+    --label traefik.frontend.rule=Host:orange.veeru4soft.xyz \
+    --replicas 2 \
+    sreeharshav/rollingupdate:v1
